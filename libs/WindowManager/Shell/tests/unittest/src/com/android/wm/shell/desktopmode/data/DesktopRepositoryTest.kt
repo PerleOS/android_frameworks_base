@@ -1860,6 +1860,13 @@ class DesktopRepositoryTest : ShellTestCase() {
     }
 
     @Test
+    fun setDeskInactive_deskNotFound_doesNotThrow() {
+        repo.setDeskInactive(deskId = 999)
+
+        assertThat(repo.getActiveDeskId(DEFAULT_DISPLAY)).isEqualTo(DEFAULT_DESKTOP_ID)
+    }
+
+    @Test
     fun setDeskInactive() {
         repo.addDesk(DEFAULT_DISPLAY, deskId = 6)
         repo.setActiveDesk(DEFAULT_DISPLAY, deskId = 6)

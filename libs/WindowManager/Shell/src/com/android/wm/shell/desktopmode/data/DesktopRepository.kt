@@ -425,7 +425,12 @@ class DesktopRepository(
 
     /** Sets the given desk as inactive if it was active. */
     fun setDeskInactive(deskId: Int) {
-        val displayId = desktopData.getDisplayForDesk(deskId)
+        val displayId = desktopData.getDesk(deskId)?.displayId
+        if (displayId == null) {
+            // The desk may be removed before the transition that deactivates it is ready.
+            logW("setDeskInactive: desk=%d not found", deskId)
+            return
+        }
         val activeDeskId = desktopData.getActiveDesk(displayId)?.deskId ?: INVALID_DESK_ID
         if (activeDeskId == INVALID_DESK_ID || activeDeskId != deskId) {
             // Desk wasn't active.
