@@ -1079,10 +1079,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                         mNotificationsAlpha = mState.getNotifAlpha() * mPanelExpansionFraction;
                         mNotificationsTint = mState.getNotifTint();
                     } else {
-                        mBehindAlpha = mLargeScreenShadeInterpolator.getBehindScrimAlpha(
-                                mPanelExpansionFraction * getDefaultScrimAlpha());
-                        mNotificationsAlpha =
-                                mLargeScreenShadeInterpolator.getNotificationScrimAlpha(
+                        mBehindAlpha = getShadePanelMaxAlpha()
+                                * mLargeScreenShadeInterpolator.getBehindScrimAlpha(
+                                        mPanelExpansionFraction * getDefaultScrimAlpha());
+                        mNotificationsAlpha = getNotificationsScrimMaxAlpha()
+                                * mLargeScreenShadeInterpolator.getNotificationScrimAlpha(
                                         mPanelExpansionFraction);
                     }
                 }
@@ -1129,7 +1130,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             } else {
                 mBehindAlpha = behindAlpha;
                 if (mState == ScrimState.KEYGUARD && mTransitionToFullShadeProgress > 0.0f) {
-                    mNotificationsAlpha = MathUtils
+                    mNotificationsAlpha = getNotificationsScrimMaxAlpha() * MathUtils
                             .saturate(mTransitionToLockScreenFullShadeNotificationsProgress);
                 } else if (mState == ScrimState.SHADE_LOCKED) {
                     // going from KEYGUARD to SHADE_LOCKED state
@@ -1146,7 +1147,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
                     // closes.
                     mNotificationsAlpha = 0;
                 } else {
-                    mNotificationsAlpha = Math.max(1.0f - getInterpolatedFraction(), mQsExpansion);
+                    mNotificationsAlpha = getNotificationsScrimMaxAlpha()
+                            * Math.max(1.0f - getInterpolatedFraction(), mQsExpansion);
                 }
                 mNotificationsTint = mState.getNotifTint();
                 mBehindTint = behindTint;
@@ -1202,7 +1204,8 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
             }
         }
         if (mQsExpansion > 0) {
-            behindAlpha = MathUtils.lerp(behindAlpha, getDefaultScrimAlpha(), mQsExpansion);
+            behindAlpha = MathUtils.lerp(behindAlpha,
+                    getDefaultScrimAlpha() * getShadePanelMaxAlpha(), mQsExpansion);
             float tintProgress = mQsExpansion;
             if (mStatusBarKeyguardViewManager.isPrimaryBouncerInTransit()) {
                 // this is case of - on lockscreen - going from expanded QS to bouncer.
@@ -1687,6 +1690,23 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, Dump
         }
 
         mNeedsDrawableColorUpdate = true;
+    }
+
+    /**
+     * Scrim views use the alpha of their tint only to blend it with the main color, and draw the
+     * result with the view alpha. Without blur, the alpha of the fallback colors therefore has to
+     * be part of the view alpha.
+     */
+    private float getShadePanelMaxAlpha() {
+        return usesFallbackShadeColors() ? Color.alpha(getShadePanelColor()) / 255f : 1f;
+    }
+
+    private float getNotificationsScrimMaxAlpha() {
+        return usesFallbackShadeColors() ? Color.alpha(getNotificationsScrimColor()) / 255f : 1f;
+    }
+
+    private boolean usesFallbackShadeColors() {
+        return Flags.notificationShadeBlur() && !isBlurCurrentlySupported() && !mClipsQsScrim;
     }
 
     private int getNotificationsScrimColor() {
