@@ -26,6 +26,7 @@
 #include <utils/Looper.h>
 #include <utils/RefBase.h>
 
+#include <atomic>
 #include <map>
 #include <memory>
 #include <string>
@@ -148,6 +149,10 @@ public:
 
     ~MousePointerController() override;
 
+    vec2 move(float deltaX, float deltaY) override;
+    void setPosition(float x, float y) override;
+    void unfade(Transition transition) override;
+
     void setPresentation(Presentation) override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
@@ -157,6 +162,11 @@ public:
     void clearSpots() override {
         LOG_ALWAYS_FATAL("Should not be called");
     }
+
+private:
+    // Whether an event has moved or positioned this pointer. PointerChoreographer also unfades it
+    // when a mouse or touchpad is added, such as a touchpad listed without its keyboard cover.
+    std::atomic<bool> mUsed{false};
 };
 
 class TouchPointerController : public PointerController {

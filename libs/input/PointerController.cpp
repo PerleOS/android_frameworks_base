@@ -377,6 +377,22 @@ MousePointerController::~MousePointerController() {
     MousePointerController::fade(Transition::IMMEDIATE);
 }
 
+vec2 MousePointerController::move(float deltaX, float deltaY) {
+    mUsed = true;
+    return PointerController::move(deltaX, deltaY);
+}
+
+void MousePointerController::setPosition(float x, float y) {
+    mUsed = true;
+    PointerController::setPosition(x, y);
+}
+
+void MousePointerController::unfade(Transition transition) {
+    if (mUsed) {
+        PointerController::unfade(transition);
+    }
+}
+
 // --- TouchPointerController ---
 
 TouchPointerController::TouchPointerController(const sp<PointerControllerPolicyInterface>& policy,
