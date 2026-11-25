@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: The PerleOS Project
+     SPDX-License-Identifier: Apache-2.0
+-->
+<!-- Removes the components and permissions merged from SystemUI-core. -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.android.systemui.scrim.tests">
+
+    <permission tools:node="removeAll" />
+    <permission-group tools:node="removeAll" />
+    <uses-permission tools:node="removeAll" />
+    <protected-broadcast tools:node="removeAll" />
+    <queries tools:node="removeAll" />
+
+    <application
+        android:debuggable="true"
+        android:largeHeap="true"
+        tools:node="replace">
+        <uses-library android:name="android.test.runner" />
+    </application>
+
+    <instrumentation
+        android:name="androidx.test.runner.AndroidJUnitRunner"
+        android:targetPackage="com.android.systemui.scrim.tests"
+        android:label="Scrim tests" />
+</manifest>
